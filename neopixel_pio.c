@@ -174,10 +174,10 @@ void turn_on_led()
 	}
 
 	npWrite();
-	sleep_ms(1000);
+	sleep_ms(500);
 	npClear();
 	npWrite();
-	sleep_ms(1000);
+	sleep_ms(500);
 
 	alarm = false;
 }
@@ -189,28 +189,33 @@ bool get_microphone_callback(struct repeating_timer *t)
 	adjusted_value = (value * MIC_VREF) / 4095.0f;
 
 	// Intensidade da voz humana em uma conversa baixa
-	if (value > 2060)
+	if (value > 2100)
 	{
 		printf("ADC Valor recebido: %d, tensão: %2f V\n", value, adjusted_value);
 
 		alarm = true;
 	}
+	else
+	{
+		alarm = false;
+	}
 
 	return true;
 }
 
-void core1_entry() {
+void core1_entry()
+{
 	bool alarm_core1 = false;
 
-	while(true) {
-		printf("Core 1: Atingiu o limite de som definido. Acionando LED\n");
+	while (true)
+	{
 		alarm_core1 = multicore_fifo_pop_blocking();
 
-		if (alarm_core1) {
+		if (alarm_core1)
+		{
+			printf("Core 1: Atingiu o limite de som definido. Acionando LED\n");
 			turn_on_led();
 		}
-
-		sleep_ms(50);
 	}
 }
 
