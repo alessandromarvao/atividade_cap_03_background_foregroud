@@ -27,7 +27,7 @@
 // Define o valor da voltagem de referência do microfone (valor máximo)
 #define MIC_VREF 3.3f
 // Tempo de execução do temporizador
-#define TIMER_MS 50
+#define TIMER_MS 20
 
 // Recebe o valor bruto do microfone
 uint16_t value;
@@ -174,10 +174,10 @@ void turn_on_led()
 	}
 
 	npWrite();
-	sleep_ms(500);
+	sleep_ms(5);
 	npClear();
 	npWrite();
-	sleep_ms(500);
+	sleep_ms(5);
 
 	alarm = false;
 }
@@ -185,19 +185,15 @@ void turn_on_led()
 // Verifica a intensidade do áudio recebida pelo microfone
 bool get_microphone_callback(struct repeating_timer *t)
 {
+	alarm = false;
+
 	value = adc_read();
 	adjusted_value = (value * MIC_VREF) / 4095.0f;
 
 	// Intensidade da voz humana em uma conversa baixa
 	if (value > 2100)
 	{
-		printf("ADC Valor recebido: %d, tensão: %2f V\n", value, adjusted_value);
-
 		alarm = true;
-	}
-	else
-	{
-		alarm = false;
 	}
 
 	return true;
@@ -210,6 +206,8 @@ void core1_entry()
 	while (true)
 	{
 		alarm_core1 = multicore_fifo_pop_blocking();
+
+		printf("ADC Valor recebido: %d, tensão: %2f V\n", value, adjusted_value);
 
 		if (alarm_core1)
 		{
